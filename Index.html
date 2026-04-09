@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Puntuación Cuantitativo Avanzado</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f5f7; color: #333; padding: 20px; }
+        .container { max-width: 650px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h2 { text-align: center; color: #2c3e50; font-size: 1.6rem; margin-top: 0; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #7f8c8d; font-size: 0.9rem; margin-bottom: 25px; }
+        
+        .rule-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #ecf0f1; }
+        .rule-name { font-weight: 600; width: 45%; color: #34495e; font-size: 0.95rem; }
+        select { padding: 10px; border-radius: 6px; border: 1px solid #bdc3c7; width: 50%; background-color: #fdfdfd; font-size: 0.9rem; cursor: pointer; }
+        select:focus { outline: none; border-color: #3498db; }
+
+        .btn-calc { width: 100%; padding: 16px; margin-top: 25px; background-color: #2c3e50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .btn-calc:hover { background-color: #1a252f; }
+
+        .result-box { margin-top: 25px; padding: 20px; text-align: center; border-radius: 8px; background-color: #f8f9fa; border: 1px solid #e9ecef; display: none; }
+        .score-title { font-size: 1rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+        .score-value { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+        .verdict { font-size: 1.2rem; font-weight: 600; padding: 8px 16px; border-radius: 20px; display: inline-block; }
+
+        /* Colores Dinámicos */
+        .color-strong-buy { color: #27ae60; }
+        .bg-strong-buy { background-color: #e8f8f5; color: #27ae60; }
+        
+        .color-buy { color: #2ecc71; }
+        .bg-buy { background-color: #eaeded; color: #2ecc71; }
+        
+        .color-neutral { color: #95a5a6; }
+        .bg-neutral { background-color: #f2f4f4; color: #7f8c8d; }
+        
+        .color-sell { color: #e74c3c; }
+        .bg-sell { background-color: #fdedec; color: #e74c3c; }
+        
+        .color-strong-sell { color: #c0392b; }
+        .bg-strong-sell { background-color: #f9ebea; color: #c0392b; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Estrategia de Puntuación Ponderada</h2>
+    <p class="subtitle">Análisis Técnico + Acción del Precio</p>
+
+    <div class="rules-container">
+        <div class="rule-row">
+            <div class="rule-name">1. Media Móvil 200 (Tendencia Mayor)</div>
+            <select id="ma200">
+                <option value="4">Precio POR ENCIMA de la MA200 (+4)</option>
+                <option value="-4">Precio POR DEBAJO de la MA200 (-4)</option>
+            </select>
+        </div>
+
+        <div class="rule-row">
+            <div class="rule-name">2. Nube Ichimoku (Kumo)</div>
+            <select id="ichimoku">
+                <option value="3">Precio POR ENCIMA de la Nube (+3)</option>
+                <option value="0" selected>Precio DENTRO de la Nube (0)</option>
+                <option value="-3">Precio POR DEBAJO de la Nube (-3)</option>
+            </select>
+        </div>
+
+        <div class="rule-row">
+            <div class="rule-name">3. MACD Diario (Fuerza)</div>
+            <select id="macd">
+                <option value="3">Cruce Alcista / Histograma Verde (+3)</option>
+                <option value="0" selected>Plano / Sin tendencia clara (0)</option>
+                <option value="-3">Cruce Bajista / Histograma Rojo (-3)</option>
+            </select>
+        </div>
+
+        <div class="rule-row">
+            <div class="rule-name">4. Acción del Precio (Velas)</div>
+            <select id="velas">
+                <option value="2">Patrón Alcista (Martillo, Envolvente) (+2)</option>
+                <option value="0" selected>Neutral / Velas pequeñas (0)</option>
+                <option value="-2">Patrón Bajista (Estrella fugaz, Envolvente) (-2)</option>
+            </select>
+        </div>
+
+        <div class="rule-row">
+            <div class="rule-name">5. RSI (Niveles de Tensión)</div>
+            <select id="rsi">
+                <option value="2">Por debajo de 30 - Sobreventa (+2)</option>
+                <option value="0" selected>Entre 30 y 70 - Zona Neutral (0)</option>
+                <option value="-2">Por encima de 70 - Sobrecompra (-2)</option>
+            </select>
+        </div>
+
+        <div class="rule-row">
+            <div class="rule-name">6. Bandas de Bollinger</div>
+            <select id="bollinger">
+                <option value="1">Precio toca la Banda Inferior (+1)</option>
+                <option value="0" selected>Precio en el Medio (0)</option>
+                <option value="-1">Precio toca la Banda Superior (-1)</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn-calc" onclick="calcularScore()">Calcular Score Total</button>
+
+    <div class="result-box" id="resultBox">
+        <div class="score-title">Puntuación Final</div>
+        <div class="score-value" id="scoreValue">0</div>
+        <div class="verdict" id="verdictText">Neutral</div>
+    </div>
+</div>
+
+<script>
+    function calcularScore() {
+        const ma200 = parseInt(document.getElementById('ma200').value);
+        const ichimoku = parseInt(document.getElementById('ichimoku').value);
+        const macd = parseInt(document.getElementById('macd').value);
+        const velas = parseInt(document.getElementById('velas').value);
+        const rsi = parseInt(document.getElementById('rsi').value);
+        const bollinger = parseInt(document.getElementById('bollinger').value);
+
+        // Calcular total (Máximo +15, Mínimo -15)
+        const totalScore = ma200 + ichimoku + macd + velas + rsi + bollinger;
+
+        const resultBox = document.getElementById('resultBox');
+        const scoreValue = document.getElementById('scoreValue');
+        const verdictText = document.getElementById('verdictText');
+
+        resultBox.style.display = 'block';
+
+        let signo = totalScore > 0 ? "+" : "";
+        scoreValue.textContent = signo + totalScore;
+        
+        scoreValue.className = 'score-value';
+        verdictText.className = 'verdict';
+
+        // Lógica de puntuación ajustada al nuevo máximo de 15
+        if (totalScore >= 9) {
+            scoreValue.classList.add('color-strong-buy');
+            verdictText.classList.add('bg-strong-buy');
+            verdictText.textContent = "COMPRA FUERTE (Alta Probabilidad)";
+        } else if (totalScore >= 3) {
+            scoreValue.classList.add('color-buy');
+            verdictText.classList.add('bg-buy');
+            verdictText.textContent = "COMPRA / MANTENER (Tendencia Positiva)";
+        } else if (totalScore > -3 && totalScore < 3) {
+            scoreValue.classList.add('color-neutral');
+            verdictText.classList.add('bg-neutral');
+            verdictText.textContent = "NEUTRAL (No Operar / Esperar)";
+        } else if (totalScore >= -8) {
+            scoreValue.classList.add('color-sell');
+            verdictText.classList.add('bg-sell');
+            verdictText.textContent = "VENDER / TOMAR GANANCIAS (Debilidad)";
+        } else {
+            scoreValue.classList.add('color-strong-sell');
+            verdictText.classList.add('bg-strong-sell');
+            verdictText.textContent = "VENTA FUERTE (Tendencia Bajista)";
+        }
+    }
+</script>
+
+</body>
+</html>
