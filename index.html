@@ -96,7 +96,7 @@
         </div>
 
         <div class="rule-row">
-            <div class="rule-name" id="lbl-velas">5. Acción del Precio (Velas)</div>
+            <div class="rule-name" id="lbl-velas">5. Acción del Precio Diaria (Velas)</div>
             <select class="indicator-select" id="velas">
                 <option value="2" id="opt-velas-1">Patrón Alcista (Martillo, Envolvente) (+2)</option>
                 <option value="0" id="opt-velas-2" selected>Neutral / Velas pequeñas (0)</option>
@@ -114,7 +114,7 @@
         </div>
 
         <div class="rule-row">
-            <div class="rule-name" id="lbl-bollinger">7. Bandas de Bollinger</div>
+            <div class="rule-name" id="lbl-bollinger">7. Bandas de Bollinger Diarias</div>
             <select class="indicator-select" id="bollinger">
                 <option value="1" id="opt-boll-1">Precio toca la Banda Inferior (+1)</option>
                 <option value="0" id="opt-boll-2" selected>Precio en el Medio (0)</option>
@@ -154,7 +154,7 @@
             macd_1: "Cruce Alcista / Histograma Verde (+3)",
             macd_2: "Plano / Sin tendencia clara (0)",
             macd_3: "Cruce Bajista / Histograma Rojo (-3)",
-            velas: "5. Acción del Precio (Velas)",
+            velas: "5. Acción del Precio Diaria (Velas)", // <-- Updated
             velas_1: "Patrón Alcista (Martillo, Envolvente) (+2)",
             velas_2: "Neutral / Velas pequeñas (0)",
             velas_3: "Patrón Bajista (Estrella fugaz, Envolvente) (-2)",
@@ -162,7 +162,7 @@
             rsi_1: "Por debajo de 30 - Sobreventa (+2)",
             rsi_2: "Entre 30 y 70 - Zona Neutral (0)",
             rsi_3: "Por encima de 70 - Sobrecompra (-2)",
-            boll: "7. Bandas de Bollinger",
+            boll: "7. Bandas de Bollinger Diarias", // <-- Updated
             boll_1: "Precio toca la Banda Inferior (+1)",
             boll_2: "Precio en el Medio (0)",
             boll_3: "Precio toca la Banda Superior (-1)",
@@ -197,7 +197,7 @@
             macd_1: "Bullish Cross / Green Histogram (+3)",
             macd_2: "Flat / No clear trend (0)",
             macd_3: "Bearish Cross / Red Histogram (-3)",
-            velas: "5. Price Action (Candlesticks)",
+            velas: "5. Daily Price Action (Candlesticks)", // <-- Updated
             velas_1: "Bullish Pattern (Hammer, Engulfing) (+2)",
             velas_2: "Neutral / Small candles (0)",
             velas_3: "Bearish Pattern (Shooting Star, Engulfing) (-2)",
@@ -205,7 +205,7 @@
             rsi_1: "Below 30 - Oversold (+2)",
             rsi_2: "Between 30 and 70 - Neutral Zone (0)",
             rsi_3: "Above 70 - Overbought (-2)",
-            boll: "7. Bollinger Bands",
+            boll: "7. Daily Bollinger Bands", // <-- Updated
             boll_1: "Price touches Lower Band (+1)",
             boll_2: "Price in the Middle (0)",
             boll_3: "Price touches Upper Band (-1)",
@@ -240,7 +240,7 @@
             macd_1: "Bullisches Kreuz / Grünes Histogramm (+3)",
             macd_2: "Flach / Kein klarer Trend (0)",
             macd_3: "Bärisches Kreuz / Rotes Histogramm (-3)",
-            velas: "5. Preisaktion (Kerzen)",
+            velas: "5. Tägliche Preisaktion (Kerzen)", // <-- Updated
             velas_1: "Bullisches Muster (Hammer, Engulfing) (+2)",
             velas_2: "Neutral / Kleine Kerzen (0)",
             velas_3: "Bärisches Muster (Shooting Star, Engulfing) (-2)",
@@ -248,7 +248,7 @@
             rsi_1: "Unter 30 - Überverkauft (+2)",
             rsi_2: "Zwischen 30 und 70 - Neutrale Zone (0)",
             rsi_3: "Über 70 - Überkauft (-2)",
-            boll: "7. Bollinger-Bänder",
+            boll: "7. Tägliche Bollinger-Bänder", // <-- Updated
             boll_1: "Preis berührt unteres Band (+1)",
             boll_2: "Preis in der Mitte (0)",
             boll_3: "Preis berührt oberes Band (-1)",
@@ -353,9 +353,7 @@
         verdictText.className = 'verdict';
         explanationText.className = 'explanation';
 
-        // Debido a que añadimos un indicador que suma máximo +3 y resta -3, ajustamos ligeramente los rangos del score total.
-        // El máximo teórico ahora es +18 y el mínimo -18.
-        
+        // Lógica de puntuación
         if (totalScore >= 11) {
             scoreValue.classList.add('color-strong-buy');
             verdictText.classList.add('bg-strong-buy');
