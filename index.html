@@ -6,7 +6,7 @@
     <title>Trading Scoring System</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f5f7; color: #333; padding: 20px; }
-        .container { max-width: 680px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; }
         
         /* Selector de idioma */
         .lang-container { position: absolute; top: 20px; right: 20px; }
@@ -14,13 +14,24 @@
 
         h2 { text-align: center; color: #2c3e50; font-size: 1.6rem; margin-top: 20px; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #7f8c8d; font-size: 0.9rem; margin-bottom: 25px; }
+
+        /* Buscador de Acciones */
+        .stock-search-container { background-color: #eaf2f8; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #d6eaf8; }
+        .search-label { display: block; font-weight: 600; margin-bottom: 8px; color: #2980b9; font-size: 0.95rem; }
+        .search-input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #bdc3c7; font-size: 1rem; box-sizing: border-box; }
+        .search-input:focus { outline: none; border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+        .stock-info-box { margin-top: 15px; padding: 15px; background-color: #fff; border-radius: 6px; border-left: 4px solid #f39c12; display: none; font-size: 0.95rem; line-height: 1.4; color: #444; }
+        .stock-ticker { font-weight: bold; color: #2c3e50; }
         
+        /* Títulos de Sección */
+        .section-title { font-size: 1.1rem; color: #2c3e50; font-weight: bold; margin-top: 25px; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #ecf0f1; text-transform: uppercase; letter-spacing: 0.5px;}
+
         .rule-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #ecf0f1; }
         .rule-name { font-weight: 600; width: 45%; color: #34495e; font-size: 0.95rem; }
-        select.indicator-select { padding: 10px; border-radius: 6px; border: 1px solid #bdc3c7; width: 50%; background-color: #fdfdfd; font-size: 0.9rem; cursor: pointer; }
+        select.indicator-select { padding: 10px; border-radius: 6px; border: 1px solid #bdc3c7; width: 50%; background-color: #fdfdfd; font-size: 0.9rem; cursor: pointer; box-sizing: border-box; }
         select.indicator-select:focus { outline: none; border-color: #3498db; }
 
-        .btn-calc { width: 100%; padding: 16px; margin-top: 25px; background-color: #2c3e50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .btn-calc { width: 100%; padding: 16px; margin-top: 30px; background-color: #2c3e50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; }
         .btn-calc:hover { background-color: #1a252f; }
 
         .result-box { margin-top: 25px; padding: 20px; text-align: center; border-radius: 8px; background-color: #f8f9fa; border: 1px solid #e9ecef; display: none; }
@@ -55,13 +66,41 @@
         </select>
     </div>
 
-    <h2 id="app-title">Estrategia de Puntuación Ponderada</h2>
-    <p class="subtitle" id="app-subtitle">Análisis Técnico (Diario + Semanal)</p>
+    <h2 id="app-title">Estrategia Cuantamental Ponderada</h2>
+    <p class="subtitle" id="app-subtitle">Técnico + Fundamental + Contexto Macro</p>
+
+    <div class="stock-search-container">
+        <label id="lbl-stock-search" class="search-label" for="stockInput">🔍 Analizador de Activos (Descubre su perfil macro):</label>
+        <input type="text" id="stockInput" class="search-input" list="stocksDatalist" placeholder="Escribe un Ticker o Empresa (Ej. AAPL, Tesla)..." oninput="showStockInfo()">
+        <datalist id="stocksDatalist"></datalist>
+        <div id="stockInfoResult" class="stock-info-box"></div>
+    </div>
 
     <div class="rules-container">
-        
+        <div class="section-title" id="sec-macro">Contexto Macro & Fundamental</div>
+
         <div class="rule-row">
-            <div class="rule-name" id="lbl-weekly">1. Tendencia Semanal (Filtro Macro)</div>
+            <div class="rule-name" id="lbl-macro">1. Entorno Macro vs Tipo de Acción</div>
+            <select class="indicator-select" id="macro">
+                <option value="3" id="opt-macro-1">Favorable (Ej: Expansión para Cíclicas, Bajada tipos para Tech) (+3)</option>
+                <option value="0" id="opt-macro-2" selected>Neutral / Impacto Mixto (0)</option>
+                <option value="-3" id="opt-macro-3">Hostil (Ej: Recesión para Cíclicas, Tipos altos para Tech) (-3)</option>
+            </select>
+        </div>
+
+        <div class="rule-row">
+            <div class="rule-name" id="lbl-fund">2. Salud Fundamental (Valoración / Beneficios)</div>
+            <select class="indicator-select" id="fund">
+                <option value="3" id="opt-fund-1">Sólida (Infravalorada / BPA creciente / Baja Deuda) (+3)</option>
+                <option value="0" id="opt-fund-2" selected>Estándar / Valoración justa (0)</option>
+                <option value="-3" id="opt-fund-3">Débil (Sobrevalorada / Pérdidas / Alta Deuda) (-3)</option>
+            </select>
+        </div>
+
+        <div class="section-title" id="sec-tech">Análisis Técnico & Price Action</div>
+
+        <div class="rule-row">
+            <div class="rule-name" id="lbl-weekly">3. Tendencia Semanal (Filtro)</div>
             <select class="indicator-select" id="weekly">
                 <option value="3" id="opt-week-1">Semanal claramente Alcista (+3)</option>
                 <option value="0" id="opt-week-2" selected>Semanal Lateral / Indecisión (0)</option>
@@ -70,7 +109,7 @@
         </div>
 
         <div class="rule-row">
-            <div class="rule-name" id="lbl-ma200">2. Media Móvil 200 Diaria</div>
+            <div class="rule-name" id="lbl-ma200">4. Media Móvil 200 Diaria</div>
             <select class="indicator-select" id="ma200">
                 <option value="4" id="opt-ma200-1">Precio POR ENCIMA de la MA200 (+4)</option>
                 <option value="-4" id="opt-ma200-2">Precio POR DEBAJO de la MA200 (-4)</option>
@@ -78,7 +117,7 @@
         </div>
 
         <div class="rule-row">
-            <div class="rule-name" id="lbl-ichimoku">3. Nube Ichimoku Diaria</div>
+            <div class="rule-name" id="lbl-ichimoku">5. Nube Ichimoku Diaria</div>
             <select class="indicator-select" id="ichimoku">
                 <option value="3" id="opt-ichi-1">Precio POR ENCIMA de la Nube (+3)</option>
                 <option value="0" id="opt-ichi-2" selected>Precio DENTRO de la Nube (0)</option>
@@ -87,7 +126,7 @@
         </div>
 
         <div class="rule-row">
-            <div class="rule-name" id="lbl-macd">4. MACD Diario (Fuerza)</div>
+            <div class="rule-name" id="lbl-macd">6. MACD Diario (Fuerza)</div>
             <select class="indicator-select" id="macd">
                 <option value="3" id="opt-macd-1">Cruce Alcista / Histograma Verde (+3)</option>
                 <option value="0" id="opt-macd-2" selected>Plano / Sin tendencia clara (0)</option>
@@ -96,7 +135,7 @@
         </div>
 
         <div class="rule-row">
-            <div class="rule-name" id="lbl-velas">5. Acción del Precio Diaria (Velas)</div>
+            <div class="rule-name" id="lbl-velas">7. Acción del Precio Diaria</div>
             <select class="indicator-select" id="velas">
                 <option value="2" id="opt-velas-1">Patrón Alcista (Martillo, Envolvente) (+2)</option>
                 <option value="0" id="opt-velas-2" selected>Neutral / Velas pequeñas (0)</option>
@@ -105,7 +144,7 @@
         </div>
 
         <div class="rule-row">
-            <div class="rule-name" id="lbl-rsi">6. RSI Diario (Tensión)</div>
+            <div class="rule-name" id="lbl-rsi">8. RSI Diario (Tensión)</div>
             <select class="indicator-select" id="rsi">
                 <option value="2" id="opt-rsi-1">Por debajo de 30 - Sobreventa (+2)</option>
                 <option value="0" id="opt-rsi-2" selected>Entre 30 y 70 - Zona Neutral (0)</option>
@@ -114,7 +153,7 @@
         </div>
 
         <div class="rule-row">
-            <div class="rule-name" id="lbl-bollinger">7. Bandas de Bollinger Diarias</div>
+            <div class="rule-name" id="lbl-bollinger">9. Bandas de Bollinger Diarias</div>
             <select class="indicator-select" id="bollinger">
                 <option value="1" id="opt-boll-1">Precio toca la Banda Inferior (+1)</option>
                 <option value="0" id="opt-boll-2" selected>Precio en el Medio (0)</option>
@@ -134,38 +173,113 @@
 </div>
 
 <script>
-    // Diccionario de traducciones extendido
+    // --- BASE DE DATOS DE ACCIONES Y TIPOS ---
+    const stockCategories = {
+        growth: { 
+            es: "🚀 <strong>Acción de Crecimiento (Growth / Tech)</strong>. Se beneficia enormemente de tipos de interés a la baja y liquidez. Sufre mucho con inflación alta o subidas de tipos.",
+            en: "🚀 <strong>Growth / Tech Stock</strong>. Benefits heavily from low interest rates and high liquidity. Suffers greatly from high inflation or rate hikes.",
+            de: "🚀 <strong>Wachstumsaktie (Growth / Tech)</strong>. Profitiert stark von niedrigen Zinsen und hoher Liquidität. Leidet sehr unter hoher Inflation oder Zinserhöhungen."
+        },
+        cyclical: {
+            es: "⚙️ <strong>Acción Cíclica (Consumo, Industrial, Energía)</strong>. Baila al ritmo de la economía. Vuela durante la expansión económica y colapsa rápidamente en recesiones.",
+            en: "⚙️ <strong>Cyclical Stock (Consumer, Industrial, Energy)</strong>. Moves with the economy. Outperforms during economic expansion and drops sharply in recessions.",
+            de: "⚙️ <strong>Zyklische Aktie (Konsum, Industrie, Energie)</strong>. Bewegt sich mit der Wirtschaft. Übertrifft in wirtschaftlichen Expansionsphasen und fällt stark in Rezessionen."
+        },
+        defensive: {
+            es: "🛡️ <strong>Acción Defensiva (Salud, Consumo Básico, Utilities)</strong>. Refugio seguro. Mantiene su valor o brilla durante recesiones y pánico, pero se queda atrás en mercados eufóricos alcistas.",
+            en: "🛡️ <strong>Defensive Stock (Healthcare, Staples, Utilities)</strong>. Safe haven. Holds value or shines during recessions and panic, but lags in euphoric bull markets.",
+            de: "🛡️ <strong>Defensive Aktie (Gesundheit, Basiskonsum, Versorger)</strong>. Sicherer Hafen. Hält den Wert in Rezessionen, hinkt aber in euphorischen Bullenmärkten hinterher."
+        },
+        financial: {
+            es: "🏦 <strong>Acción Financiera (Bancos, Seguros)</strong>. Sector particular. Suele beneficiarse de tipos de interés altos (mayor margen) si no hay recesión profunda.",
+            en: "🏦 <strong>Financial Stock (Banks, Insurance)</strong>. Unique sector. Often benefits from higher interest rates (better margins) as long as there is no deep recession.",
+            de: "🏦 <strong>Finanzaktie (Banken, Versicherungen)</strong>. Spezieller Sektor. Profitiert oft von höheren Zinsen (bessere Margen), solange es keine tiefe Rezession gibt."
+        }
+    };
+
+    const stocksDatabase = [
+        // Growth / Tech
+        { ticker: "AAPL", name: "Apple Inc.", type: "growth" },
+        { ticker: "MSFT", name: "Microsoft Corp.", type: "growth" },
+        { ticker: "NVDA", name: "NVIDIA", type: "growth" },
+        { ticker: "GOOGL", name: "Alphabet (Google)", type: "growth" },
+        { ticker: "AMZN", name: "Amazon", type: "growth" },
+        { ticker: "META", name: "Meta (Facebook)", type: "growth" },
+        { ticker: "TSLA", name: "Tesla Inc.", type: "growth" },
+        // Cyclical
+        { ticker: "XOM", name: "Exxon Mobil", type: "cyclical" },
+        { ticker: "CVX", name: "Chevron", type: "cyclical" },
+        { ticker: "CAT", name: "Caterpillar", type: "cyclical" },
+        { ticker: "F", name: "Ford Motor", type: "cyclical" },
+        { ticker: "HD", name: "Home Depot", type: "cyclical" },
+        { ticker: "NKE", name: "Nike", type: "cyclical" },
+        // Defensive
+        { ticker: "JNJ", name: "Johnson & Johnson", type: "defensive" },
+        { ticker: "PG", name: "Procter & Gamble", type: "defensive" },
+        { ticker: "KO", name: "Coca-Cola", type: "defensive" },
+        { ticker: "PEP", name: "PepsiCo", type: "defensive" },
+        { ticker: "WMT", name: "Walmart", type: "defensive" },
+        // Financial
+        { ticker: "JPM", name: "JPMorgan Chase", type: "financial" },
+        { ticker: "BAC", name: "Bank of America", type: "financial" },
+        { ticker: "V", name: "Visa", type: "financial" },
+        { ticker: "MA", name: "Mastercard", type: "financial" }
+    ];
+
+    // --- DICCIONARIO GENERAL ---
     const i18n = {
         es: {
-            title: "Estrategia de Puntuación Ponderada",
-            subtitle: "Análisis Técnico (Diario + Semanal)",
-            weekly: "1. Tendencia Semanal (Filtro Macro)",
+            title: "Estrategia Cuantamental Ponderada",
+            subtitle: "Técnico + Fundamental + Contexto Macro",
+            search_lbl: "🔍 Analizador de Activos (Descubre su perfil macro):",
+            search_plc: "Escribe un Ticker o Empresa (Ej. AAPL, Tesla)...",
+            sec_macro: "Contexto Macro & Fundamental",
+            sec_tech: "Análisis Técnico & Price Action",
+            
+            macro: "1. Entorno Macro vs Tipo de Acción",
+            macro_1: "Favorable (Ej: Expansión para Cíclicas, Bajada tipos para Tech) (+3)",
+            macro_2: "Neutral / Impacto Mixto (0)",
+            macro_3: "Hostil (Ej: Recesión para Cíclicas, Tipos altos para Tech) (-3)",
+            
+            fund: "2. Salud Fundamental (Valoración / Beneficios)",
+            fund_1: "Sólida (Infravalorada / BPA creciente / Baja Deuda) (+3)",
+            fund_2: "Estándar / Valoración justa (0)",
+            fund_3: "Débil (Sobrevalorada / Pérdidas / Alta Deuda) (-3)",
+
+            weekly: "3. Tendencia Semanal (Filtro)",
             week_1: "Semanal claramente Alcista (+3)",
             week_2: "Semanal Lateral / Indecisión (0)",
             week_3: "Semanal claramente Bajista (-3)",
-            ma200: "2. Media Móvil 200 Diaria",
+            
+            ma200: "4. Media Móvil 200 Diaria",
             ma200_1: "Precio POR ENCIMA de la MA200 (+4)",
             ma200_2: "Precio POR DEBAJO de la MA200 (-4)",
-            ichi: "3. Nube Ichimoku Diaria",
+            
+            ichi: "5. Nube Ichimoku Diaria",
             ichi_1: "Precio POR ENCIMA de la Nube (+3)",
             ichi_2: "Precio DENTRO de la Nube (0)",
             ichi_3: "Precio POR DEBAJO de la Nube (-3)",
-            macd: "4. MACD Diario (Fuerza)",
+            
+            macd: "6. MACD Diario (Fuerza)",
             macd_1: "Cruce Alcista / Histograma Verde (+3)",
             macd_2: "Plano / Sin tendencia clara (0)",
             macd_3: "Cruce Bajista / Histograma Rojo (-3)",
-            velas: "5. Acción del Precio Diaria (Velas)", // <-- Updated
+            
+            velas: "7. Acción del Precio Diaria",
             velas_1: "Patrón Alcista (Martillo, Envolvente) (+2)",
             velas_2: "Neutral / Velas pequeñas (0)",
             velas_3: "Patrón Bajista (Estrella fugaz, Envolvente) (-2)",
-            rsi: "6. RSI Diario (Tensión)",
+            
+            rsi: "8. RSI Diario (Tensión)",
             rsi_1: "Por debajo de 30 - Sobreventa (+2)",
             rsi_2: "Entre 30 y 70 - Zona Neutral (0)",
             rsi_3: "Por encima de 70 - Sobrecompra (-2)",
-            boll: "7. Bandas de Bollinger Diarias", // <-- Updated
+            
+            boll: "9. Bandas de Bollinger Diarias",
             boll_1: "Precio toca la Banda Inferior (+1)",
             boll_2: "Precio en el Medio (0)",
             boll_3: "Precio toca la Banda Superior (-1)",
+            
             btn: "Calcular Score Total",
             result: "Puntuación Final",
             v_sbuy: "COMPRA FUERTE",
@@ -173,42 +287,65 @@
             v_neutral: "NEUTRAL / ESPERAR",
             v_sell: "VENDER / PRECAUCIÓN",
             v_ssell: "VENTA FUERTE",
-            exp_sbuy: "<strong>¿Por qué Comprar?</strong> Hay una alineación casi perfecta entre la tendencia macro (MA200/Semanal) y el momentum a corto plazo (MACD/Precio). Las probabilidades están fuertemente a favor de un movimiento alcista. Es un entorno óptimo para abrir posiciones largas.",
-            exp_buy: "<strong>¿Por qué Comprar/Mantener?</strong> La estructura general es alcista, pero algunos indicadores secundarios (como RSI o bandas) no están perfectamente alineados o sugieren una pausa. Es buena zona para mantener compras existentes o acumular progresivamente.",
-            exp_neutral: "<strong>¿Por qué Esperar?</strong> Los indicadores muestran señales contradictorias. Es posible que el marco de tiempo semanal choque con el diario, o que el precio esté en un rango lateral sin fuerza. La preservación del capital es clave aquí; espera a que la tendencia se defina.",
-            exp_sell: "<strong>¿Por qué Vender?</strong> El activo muestra una debilidad clara. Es probable que esté perdiendo soportes diarios importantes o el momentum se esté agotando. Considera ajustar tus stop-loss o tomar ganancias parciales si estás comprado.",
-            exp_ssell: "<strong>¿Por qué Venta Fuerte?</strong> Confluencia bajista total. El precio está siendo rechazado en marcos de tiempo diarios y semanales, operando bajo las medias móviles clave con momentum negativo. Alta probabilidad para ventas en corto (short) o para salir completamente de posiciones largas."
+            
+            exp_sbuy: "<strong>¿Por qué Comprar?</strong> Confluencia total. El entorno macroeconómico soporta el crecimiento de la empresa, los fundamentales son sólidos, y la tendencia técnica es alcista tanto a corto como a largo plazo. Riesgo asimétrico muy favorable.",
+            exp_buy: "<strong>¿Por qué Comprar/Mantener?</strong> La estructura general apoya el precio al alza. Podría haber un ligero desajuste (ej. técnico excelente pero fundamentales promedio, o viceversa). Es una buena zona para escalar compras.",
+            exp_neutral: "<strong>¿Por qué Esperar?</strong> Conflicto de señales. Podrías estar frente a una empresa con grandes fundamentales pero en tendencia técnica bajista, o un valor técnico fuerte pero en un entorno macro que lo castiga. Preserva capital hasta que las fuerzas se alineen.",
+            exp_sell: "<strong>¿Por qué Vender?</strong> El activo muestra deterioro evidente. El entorno macroeconómico o la salud de la empresa actúan como viento en contra, y los técnicos han comenzado a perder soportes clave. Considera asegurar ganancias o ajustar stops.",
+            exp_ssell: "<strong>¿Por qué Venta Fuerte?</strong> Tormenta perfecta bajista. La empresa cotiza con prima inmerecida, quema caja o el macro la penaliza severamente, todo validado por un gráfico que rompe soportes semanales y diarios. Ideal para operar en corto o evitar por completo."
         },
         en: {
-            title: "Weighted Scoring Strategy",
-            subtitle: "Technical Analysis (Daily + Weekly)",
-            weekly: "1. Weekly Trend (Macro Filter)",
+            title: "Quantamental Scoring Strategy",
+            subtitle: "Technical + Fundamental + Macro Context",
+            search_lbl: "🔍 Asset Analyzer (Discover its macro profile):",
+            search_plc: "Type a Ticker or Company (e.g., AAPL, Tesla)...",
+            sec_macro: "Macro Context & Fundamentals",
+            sec_tech: "Technical Analysis & Price Action",
+            
+            macro: "1. Macro Environment vs Stock Type",
+            macro_1: "Favorable (e.g., Expansion for Cyclicals, Rate cuts for Tech) (+3)",
+            macro_2: "Neutral / Mixed Impact (0)",
+            macro_3: "Hostile (e.g., Recession for Cyclicals, High Rates for Tech) (-3)",
+            
+            fund: "2. Fundamental Health (Valuation / Earnings)",
+            fund_1: "Solid (Undervalued / Growing EPS / Low Debt) (+3)",
+            fund_2: "Standard / Fair Value (0)",
+            fund_3: "Weak (Overvalued / Losses / High Debt) (-3)",
+
+            weekly: "3. Weekly Trend (Filter)",
             week_1: "Weekly Clearly Bullish (+3)",
             week_2: "Weekly Ranging / Indecision (0)",
             week_3: "Weekly Clearly Bearish (-3)",
-            ma200: "2. Daily 200 Moving Average",
+            
+            ma200: "4. Daily 200 Moving Average",
             ma200_1: "Price ABOVE MA200 (+4)",
             ma200_2: "Price BELOW MA200 (-4)",
-            ichi: "3. Daily Ichimoku Cloud",
+            
+            ichi: "5. Daily Ichimoku Cloud",
             ichi_1: "Price ABOVE the Cloud (+3)",
             ichi_2: "Price INSIDE the Cloud (0)",
             ichi_3: "Price BELOW the Cloud (-3)",
-            macd: "4. Daily MACD (Momentum)",
+            
+            macd: "6. Daily MACD (Momentum)",
             macd_1: "Bullish Cross / Green Histogram (+3)",
             macd_2: "Flat / No clear trend (0)",
             macd_3: "Bearish Cross / Red Histogram (-3)",
-            velas: "5. Daily Price Action (Candlesticks)", // <-- Updated
+            
+            velas: "7. Daily Price Action",
             velas_1: "Bullish Pattern (Hammer, Engulfing) (+2)",
             velas_2: "Neutral / Small candles (0)",
             velas_3: "Bearish Pattern (Shooting Star, Engulfing) (-2)",
-            rsi: "6. Daily RSI (Tension)",
+            
+            rsi: "8. Daily RSI (Tension)",
             rsi_1: "Below 30 - Oversold (+2)",
             rsi_2: "Between 30 and 70 - Neutral Zone (0)",
             rsi_3: "Above 70 - Overbought (-2)",
-            boll: "7. Daily Bollinger Bands", // <-- Updated
+            
+            boll: "9. Daily Bollinger Bands",
             boll_1: "Price touches Lower Band (+1)",
             boll_2: "Price in the Middle (0)",
             boll_3: "Price touches Upper Band (-1)",
+            
             btn: "Calculate Total Score",
             result: "Final Score",
             v_sbuy: "STRONG BUY",
@@ -216,42 +353,65 @@
             v_neutral: "NEUTRAL / WAIT",
             v_sell: "SELL / CAUTION",
             v_ssell: "STRONG SELL",
-            exp_sbuy: "<strong>Why Strong Buy?</strong> There is near-perfect alignment between the macro trend (MA200/Weekly) and short-term momentum (MACD/Price Action). Probabilities heavily favor upside continuation. Optimal environment for long positions.",
-            exp_buy: "<strong>Why Buy/Hold?</strong> The overall structure is bullish, but some secondary indicators (like RSI or bands) may lack perfect alignment or suggest a slight pause. Good zone for holding existing longs or scaling in slowly.",
-            exp_neutral: "<strong>Why Wait?</strong> Indicators are printing mixed signals. The weekly timeframe might be conflicting with the daily, or price is stuck in a choppy range. Capital preservation is priority; wait for a clearer trend to emerge.",
-            exp_sell: "<strong>Why Sell?</strong> Weakness is apparent. The asset is likely breaking daily supports or momentum is exhausted. Consider tightening stop-losses or taking partial profits if you are long.",
-            exp_ssell: "<strong>Why Strong Sell?</strong> Complete bearish confluence. Price is rejected across daily and weekly timeframes, trading below key moving averages with negative momentum. High probability environment for shorting or exiting longs completely."
+            
+            exp_sbuy: "<strong>Why Strong Buy?</strong> Full confluence. The macro environment supports the company's growth, fundamentals are robust, and technical trends align bullishly across short and long timeframes. Highly asymmetric risk-to-reward.",
+            exp_buy: "<strong>Why Buy/Hold?</strong> The overall structure supports higher prices. There might be a slight divergence (e.g., great technicals but average fundamentals). Good zone to hold or scale into positions.",
+            exp_neutral: "<strong>Why Wait?</strong> Conflicting signals. You might be looking at a fundamentally great company in a downtrend, or a technically strong stock in a hostile macro environment. Preserve capital until forces align.",
+            exp_sell: "<strong>Why Sell?</strong> Obvious deterioration. Macro headwinds or weakening company health are validated by technicals breaking below key supports. Consider taking profits or tightening stop-losses.",
+            exp_ssell: "<strong>Why Strong Sell?</strong> Perfect bearish storm. The company is overvalued, bleeding cash, or crushed by macro factors, fully validated by a chart breaking weekly and daily supports. Ideal for shorting or total avoidance."
         },
         de: {
-            title: "Gewichtete Bewertungsstrategie",
-            subtitle: "Technische Analyse (Täglich + Wöchentlich)",
-            weekly: "1. Wochentrend (Makrofilter)",
+            title: "Quantamentale Bewertungsstrategie",
+            subtitle: "Technik + Fundamental + Makro-Kontext",
+            search_lbl: "🔍 Asset-Analysator (Makroprofil entdecken):",
+            search_plc: "Ticker oder Unternehmen eingeben (z.B. AAPL, Tesla)...",
+            sec_macro: "Makro-Kontext & Fundamentaldaten",
+            sec_tech: "Technische Analyse & Price Action",
+            
+            macro: "1. Makro-Umfeld vs. Aktientyp",
+            macro_1: "Günstig (z.B. Expansion für Zykliker, Zinssenkungen für Tech) (+3)",
+            macro_2: "Neutral / Gemischte Auswirkungen (0)",
+            macro_3: "Feindlich (z.B. Rezession für Zykliker, Hohe Zinsen für Tech) (-3)",
+            
+            fund: "2. Fundamentale Gesundheit (Bewertung / Gewinn)",
+            fund_1: "Solide (Unterbewertet / Steigendes EPS / Geringe Schulden) (+3)",
+            fund_2: "Standard / Fairer Wert (0)",
+            fund_3: "Schwach (Überbewertet / Verluste / Hohe Schulden) (-3)",
+
+            weekly: "3. Wöchentlicher Trend (Filter)",
             week_1: "Wöchentlich klar Bullisch (+3)",
             week_2: "Wöchentlich Seitwärts / Unentschlossenheit (0)",
             week_3: "Wöchentlich klar Bärisch (-3)",
-            ma200: "2. Tägliche 200-Tage-Linie",
+            
+            ma200: "4. Tägliche 200-Tage-Linie",
             ma200_1: "Preis ÜBER MA200 (+4)",
             ma200_2: "Preis UNTER MA200 (-4)",
-            ichi: "3. Tägliche Ichimoku-Wolke",
+            
+            ichi: "5. Tägliche Ichimoku-Wolke",
             ichi_1: "Preis ÜBER der Wolke (+3)",
             ichi_2: "Preis IN der Wolke (0)",
             ichi_3: "Preis UNTER der Wolke (-3)",
-            macd: "4. Täglicher MACD (Momentum)",
+            
+            macd: "6. Täglicher MACD (Momentum)",
             macd_1: "Bullisches Kreuz / Grünes Histogramm (+3)",
             macd_2: "Flach / Kein klarer Trend (0)",
             macd_3: "Bärisches Kreuz / Rotes Histogramm (-3)",
-            velas: "5. Tägliche Preisaktion (Kerzen)", // <-- Updated
+            
+            velas: "7. Tägliche Preisaktion",
             velas_1: "Bullisches Muster (Hammer, Engulfing) (+2)",
             velas_2: "Neutral / Kleine Kerzen (0)",
             velas_3: "Bärisches Muster (Shooting Star, Engulfing) (-2)",
-            rsi: "6. Täglicher RSI (Spannung)",
+            
+            rsi: "8. Täglicher RSI (Spannung)",
             rsi_1: "Unter 30 - Überverkauft (+2)",
             rsi_2: "Zwischen 30 und 70 - Neutrale Zone (0)",
             rsi_3: "Über 70 - Überkauft (-2)",
-            boll: "7. Tägliche Bollinger-Bänder", // <-- Updated
+            
+            boll: "9. Tägliche Bollinger-Bänder",
             boll_1: "Preis berührt unteres Band (+1)",
             boll_2: "Preis in der Mitte (0)",
             boll_3: "Preis berührt oberes Band (-1)",
+            
             btn: "Gesamtpunktzahl berechnen",
             result: "Endstand",
             v_sbuy: "STARKER KAUF",
@@ -259,23 +419,60 @@
             v_neutral: "NEUTRAL / WARTEN",
             v_sell: "VERKAUFEN / VORSICHT",
             v_ssell: "STARKER VERKAUF",
-            exp_sbuy: "<strong>Warum Starker Kauf?</strong> Es besteht eine nahezu perfekte Übereinstimmung zwischen dem Makrotrend (MA200/Wöchentlich) und dem kurzfristigen Momentum (MACD/Preis). Die Wahrscheinlichkeiten sprechen stark für eine Aufwärtsbewegung. Optimales Umfeld für Long-Positionen.",
-            exp_buy: "<strong>Warum Kaufen/Halten?</strong> Die allgemeine Struktur ist bullisch, aber einige sekundäre Indikatoren (wie RSI) sind nicht perfekt ausgerichtet. Gute Zone, um bestehende Käufe zu halten oder schrittweise aufzustocken.",
-            exp_neutral: "<strong>Warum Warten?</strong> Die Indikatoren liefern gemischte Signale. Der wöchentliche Zeitrahmen könnte mit dem täglichen kollidieren. Kapitalerhalt hat Priorität; warten Sie auf einen klareren Trend.",
-            exp_sell: "<strong>Warum Verkaufen?</strong> Schwäche ist offensichtlich. Der Vermögenswert verliert wahrscheinlich wichtige Unterstützungen. Erwägen Sie, Stop-Losses enger zu ziehen oder Teilgewinne mitzunehmen.",
-            exp_ssell: "<strong>Warum Starker Verkauf?</strong> Komplette bärische Konfluenz. Der Preis wird in beiden Zeitrahmen abgelehnt und wird unter den gleitenden Durchschnitten gehandelt. Hohe Wahrscheinlichkeit für Leerverkäufe (Short) oder den kompletten Ausstieg aus Long-Positionen."
+            
+            exp_sbuy: "<strong>Warum Starker Kauf?</strong> Volle Konfluenz. Das Makroumfeld stützt das Wachstum, die Fundamentaldaten sind robust und die technischen Trends sind auf allen Zeitebenen bullisch. Sehr asymmetrisches Chance-Risiko-Verhältnis.",
+            exp_buy: "<strong>Warum Kaufen/Halten?</strong> Die allgemeine Struktur unterstützt steigende Preise. Es könnte leichte Abweichungen geben (z.B. tolle Technik, aber durchschnittliche Fundamentaldaten). Gute Zone zum Halten oder schrittweisen Kaufen.",
+            exp_neutral: "<strong>Warum Warten?</strong> Widersprüchliche Signale. Entweder starke Fundamentaldaten in einem Abwärtstrend oder starke Technik in einem feindlichen Makroumfeld. Kapital erhalten, bis die Signale übereinstimmen.",
+            exp_sell: "<strong>Warum Verkaufen?</strong> Offensichtliche Verschlechterung. Makro-Gegenwind oder eine schwache Unternehmensgesundheit werden durch das Brechen wichtiger technischer Unterstützungen bestätigt. Gewinne mitnehmen oder Stopps enger ziehen.",
+            exp_ssell: "<strong>Warum Starker Verkauf?</strong> Der perfekte bärische Sturm. Das Unternehmen ist überbewertet, verbrennt Bargeld oder wird durch Makrofaktoren erdrückt. Der Chart bricht wöchentliche und tägliche Unterstützungen. Ideal für Leerverkäufe."
         }
     };
 
     let currentLang = 'es';
 
+    // Inicializar datalist al cargar la página
+    window.onload = function() {
+        const datalist = document.getElementById('stocksDatalist');
+        stocksDatabase.forEach(stock => {
+            const option = document.createElement('option');
+            option.value = `${stock.ticker} - ${stock.name}`;
+            datalist.appendChild(option);
+        });
+    };
+
+    function showStockInfo() {
+        const inputVal = document.getElementById('stockInput').value.toUpperCase();
+        const infoBox = document.getElementById('stockInfoResult');
+        
+        // Buscar coincidencia en la base de datos (por Ticker o Nombre)
+        const match = stocksDatabase.find(s => 
+            inputVal.includes(s.ticker) || inputVal.includes(s.name.toUpperCase())
+        );
+
+        if (match) {
+            const categoryText = stockCategories[match.type][currentLang];
+            infoBox.style.display = 'block';
+            infoBox.innerHTML = `<span class="stock-ticker">${match.name} (${match.ticker})</span><br><br>${categoryText}`;
+        } else {
+            infoBox.style.display = 'none';
+        }
+    }
+
     function changeLanguage() {
         currentLang = document.getElementById('langSelector').value;
         const t = i18n[currentLang];
 
-        // Textos estáticos
         document.getElementById('app-title').textContent = t.title;
         document.getElementById('app-subtitle').textContent = t.subtitle;
+        
+        document.getElementById('lbl-stock-search').textContent = t.search_lbl;
+        document.getElementById('stockInput').placeholder = t.search_plc;
+
+        document.getElementById('sec-macro').textContent = t.sec_macro;
+        document.getElementById('sec-tech').textContent = t.sec_tech;
+
+        document.getElementById('lbl-macro').textContent = t.macro;
+        document.getElementById('lbl-fund').textContent = t.fund;
         document.getElementById('lbl-weekly').textContent = t.weekly;
         document.getElementById('lbl-ma200').textContent = t.ma200;
         document.getElementById('lbl-ichimoku').textContent = t.ichi;
@@ -286,47 +483,52 @@
         document.getElementById('btn-calc').textContent = t.btn;
         document.getElementById('lbl-result').textContent = t.result;
 
-        // Opciones Weekly
+        document.getElementById('opt-macro-1').textContent = t.macro_1;
+        document.getElementById('opt-macro-2').textContent = t.macro_2;
+        document.getElementById('opt-macro-3').textContent = t.macro_3;
+
+        document.getElementById('opt-fund-1').textContent = t.fund_1;
+        document.getElementById('opt-fund-2').textContent = t.fund_2;
+        document.getElementById('opt-fund-3').textContent = t.fund_3;
+
         document.getElementById('opt-week-1').textContent = t.week_1;
         document.getElementById('opt-week-2').textContent = t.week_2;
         document.getElementById('opt-week-3').textContent = t.week_3;
 
-        // Opciones MA200
         document.getElementById('opt-ma200-1').textContent = t.ma200_1;
         document.getElementById('opt-ma200-2').textContent = t.ma200_2;
 
-        // Opciones Ichimoku
         document.getElementById('opt-ichi-1').textContent = t.ichi_1;
         document.getElementById('opt-ichi-2').textContent = t.ichi_2;
         document.getElementById('opt-ichi-3').textContent = t.ichi_3;
 
-        // Opciones MACD
         document.getElementById('opt-macd-1').textContent = t.macd_1;
         document.getElementById('opt-macd-2').textContent = t.macd_2;
         document.getElementById('opt-macd-3').textContent = t.macd_3;
 
-        // Opciones Velas
         document.getElementById('opt-velas-1').textContent = t.velas_1;
         document.getElementById('opt-velas-2').textContent = t.velas_2;
         document.getElementById('opt-velas-3').textContent = t.velas_3;
 
-        // Opciones RSI
         document.getElementById('opt-rsi-1').textContent = t.rsi_1;
         document.getElementById('opt-rsi-2').textContent = t.rsi_2;
         document.getElementById('opt-rsi-3').textContent = t.rsi_3;
 
-        // Opciones Bollinger
         document.getElementById('opt-boll-1').textContent = t.boll_1;
         document.getElementById('opt-boll-2').textContent = t.boll_2;
         document.getElementById('opt-boll-3').textContent = t.boll_3;
 
-        // Si la caja de resultados ya está visible, recalcular para actualizar el texto del veredicto y explicación
+        // Refrescar el cuadro de info de acción si hay una seleccionada
+        showStockInfo();
+
         if(document.getElementById('resultBox').style.display === 'block') {
             calcularScore();
         }
     }
 
     function calcularScore() {
+        const macro = parseInt(document.getElementById('macro').value);
+        const fund = parseInt(document.getElementById('fund').value);
         const weekly = parseInt(document.getElementById('weekly').value);
         const ma200 = parseInt(document.getElementById('ma200').value);
         const ichimoku = parseInt(document.getElementById('ichimoku').value);
@@ -335,8 +537,8 @@
         const rsi = parseInt(document.getElementById('rsi').value);
         const bollinger = parseInt(document.getElementById('bollinger').value);
 
-        const totalScore = weekly + ma200 + ichimoku + macd + velas + rsi + bollinger;
-        const t = i18n[currentLang]; // Diccionario actual
+        const totalScore = macro + fund + weekly + ma200 + ichimoku + macd + velas + rsi + bollinger;
+        const t = i18n[currentLang]; 
 
         const resultBox = document.getElementById('resultBox');
         const scoreValue = document.getElementById('scoreValue');
@@ -348,31 +550,29 @@
         let signo = totalScore > 0 ? "+" : "";
         scoreValue.textContent = signo + totalScore;
         
-        // Reset classes
         scoreValue.className = 'score-value';
         verdictText.className = 'verdict';
         explanationText.className = 'explanation';
 
-        // Lógica de puntuación
-        if (totalScore >= 11) {
+        if (totalScore >= 14) {
             scoreValue.classList.add('color-strong-buy');
             verdictText.classList.add('bg-strong-buy');
             explanationText.classList.add('border-strong-buy');
             verdictText.textContent = t.v_sbuy;
             explanationText.innerHTML = t.exp_sbuy;
-        } else if (totalScore >= 4) {
+        } else if (totalScore >= 5) {
             scoreValue.classList.add('color-buy');
             verdictText.classList.add('bg-buy');
             explanationText.classList.add('border-buy');
             verdictText.textContent = t.v_buy;
             explanationText.innerHTML = t.exp_buy;
-        } else if (totalScore > -4 && totalScore < 4) {
+        } else if (totalScore > -5 && totalScore < 5) {
             scoreValue.classList.add('color-neutral');
             verdictText.classList.add('bg-neutral');
             explanationText.classList.add('border-neutral');
             verdictText.textContent = t.v_neutral;
             explanationText.innerHTML = t.exp_neutral;
-        } else if (totalScore >= -10) {
+        } else if (totalScore >= -13) {
             scoreValue.classList.add('color-sell');
             verdictText.classList.add('bg-sell');
             explanationText.classList.add('border-sell');
